@@ -42,6 +42,7 @@ function MainApp() {
   const handleLogin = async () => {
     try {
       const res = await axios.post(
+        "https://ai-summarizer-backend-1bo1.onrender.com/"
         "http://127.0.0.1:8000/login",
         {
           email,
