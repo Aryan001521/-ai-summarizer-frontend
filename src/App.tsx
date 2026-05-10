@@ -5,7 +5,7 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link
+  Link,
 } from "react-router-dom";
 
 import AdminDashboard from "./Pages/AdminDashboard";
@@ -14,7 +14,6 @@ const BASE_URL =
   "https://ai-summarizer-backend-1bo1.onrender.com";
 
 function MainApp() {
-
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token")
   );
@@ -29,32 +28,24 @@ function MainApp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [text, setText] = useState<string>("");
+  const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
-  const [summary, setSummary] = useState<string>("");
+  const [summary, setSummary] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const [loading, setLoading] = useState<boolean>(false);
-
-  // FILE
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-
-    if (
-      e.target.files &&
-      e.target.files.length > 0
-    ) {
+    if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
     }
   };
 
   // LOGIN
   const handleLogin = async () => {
-
     try {
-
       const res = await axios.post(
         `${BASE_URL}/login`,
         {
@@ -75,24 +66,22 @@ function MainApp() {
 
       setToken(res.data.access_token);
 
+      alert("Login successful");
+
       window.location.reload();
-
-    } catch (error: any) {
-
-      console.log(error);
+    } catch (err: any) {
+      console.log(err);
 
       alert(
-        error?.response?.data?.detail ||
-        "Login failed"
+        err?.response?.data?.detail ||
+          "Login failed"
       );
     }
   };
 
   // SIGNUP
   const handleSignup = async () => {
-
     try {
-
       await axios.post(
         `${BASE_URL}/signup`,
         {
@@ -102,26 +91,20 @@ function MainApp() {
         }
       );
 
-      alert(
-        "Signup successful, now login"
-      );
-
+      alert("Signup successful");
       setIsSignup(false);
-
-    } catch (error: any) {
-
-      console.log(error);
+    } catch (err: any) {
+      console.log(err);
 
       alert(
-        error?.response?.data?.detail ||
-        "Signup failed"
+        err?.response?.data?.detail ||
+          "Signup failed"
       );
     }
   };
 
   // LOGOUT
   const handleLogout = () => {
-
     localStorage.removeItem("token");
     localStorage.removeItem("email");
 
@@ -132,20 +115,14 @@ function MainApp() {
 
   // SUMMARIZE
   const handleSummarize = async () => {
-
     if (!text && !file) {
-
-      alert(
-        "Please enter text or upload a PDF"
-      );
-
+      alert("Enter text or upload PDF");
       return;
     }
 
     setLoading(true);
 
     try {
-
       const formData = new FormData();
 
       if (text) {
@@ -166,44 +143,16 @@ function MainApp() {
         }
       );
 
-      console.log(
-        "SUCCESS:",
-        response.data
+      setSummary(response.data.summary);
+      setKeywords(response.data.keywords);
+    } catch (err: any) {
+      console.log(err);
+
+      alert(
+        err?.response?.data?.detail ||
+          err?.message ||
+          "Error while summarizing"
       );
-
-      setSummary(
-        response.data.summary || ""
-      );
-
-      setKeywords(
-        response.data.keywords || []
-      );
-
-    } catch (error: any) {
-
-      console.log(
-        "FULL ERROR:",
-        error
-      );
-
-      if (error.response) {
-
-        console.log(
-          "ERROR DATA:",
-          error.response.data
-        );
-
-        alert(
-          JSON.stringify(
-            error.response.data
-          )
-        );
-
-      } else {
-
-        alert(error.message);
-      }
-
     }
 
     setLoading(false);
@@ -211,7 +160,6 @@ function MainApp() {
 
   // DOWNLOAD PDF
   const downloadPDF = () => {
-
     const doc = new jsPDF();
 
     doc.setFontSize(16);
@@ -224,11 +172,7 @@ function MainApp() {
 
     doc.setFontSize(12);
 
-    doc.text(
-      "Summary:",
-      20,
-      40
-    );
+    doc.text("Summary:", 20, 40);
 
     const splitSummary =
       doc.splitTextToSize(
@@ -257,29 +201,18 @@ function MainApp() {
     doc.save("summary.pdf");
   };
 
-  // LOGIN / SIGNUP PAGE
+  // LOGIN PAGE
   if (!token) {
-
     return (
-
       <div className="app auth-page">
-
         <h1>
           {isSignup
             ? "Create Account"
             : "Welcome Back"}
         </h1>
 
-        <p className="subtitle">
-          {isSignup
-            ? "Signup to continue"
-            : "Login to your account"}
-        </p>
-
         <div className="card">
-
           {isSignup && (
-
             <input
               placeholder="Username"
               value={username}
@@ -289,7 +222,6 @@ function MainApp() {
                 )
               }
             />
-
           )}
 
           <input
@@ -303,8 +235,8 @@ function MainApp() {
           />
 
           <input
-            placeholder="Password"
             type="password"
+            placeholder="Password"
             value={password}
             onChange={(e) =>
               setPassword(
@@ -320,11 +252,9 @@ function MainApp() {
                 : handleLogin
             }
           >
-
             {isSignup
               ? "Signup"
               : "Login"}
-
           </button>
 
           <p
@@ -335,24 +265,18 @@ function MainApp() {
               )
             }
           >
-
             {isSignup
-              ? "Already have an account? Login"
-              : "New user? Create account"}
-
+              ? "Already have account? Login"
+              : "New user? Signup"}
           </p>
-
         </div>
-
       </div>
     );
   }
 
   // MAIN APP
   return (
-
     <div className="app">
-
       <h1>
         ✨ AI Text Summarizer
       </h1>
@@ -362,37 +286,28 @@ function MainApp() {
           marginBottom: "20px",
         }}
       >
-
         {savedEmail ===
           "admin@gmail.com" && (
-
           <Link to="/admin">
-
             <button>
               Open Admin Dashboard
             </button>
-
           </Link>
         )}
 
         <button
-          className="logout-btn"
           onClick={handleLogout}
           style={{
             marginLeft: "10px",
           }}
         >
-
           Logout
-
         </button>
-
       </div>
 
       <div className="card">
-
         <textarea
-          placeholder="Paste your text here..."
+          placeholder="Paste text here..."
           value={text}
           onChange={(e) =>
             setText(
@@ -401,40 +316,32 @@ function MainApp() {
           }
         />
 
-        <div className="upload-box">
+        <input
+          type="file"
+          accept=".pdf"
+          onChange={
+            handleFileChange
+          }
+        />
 
-          <input
-            type="file"
-            accept=".pdf"
-            onChange={
-              handleFileChange
-            }
-          />
-
-          {file && (
-            <p>
-              📄 {file.name}
-            </p>
-          )}
-
-        </div>
+        {file && (
+          <p>
+            📄 {file.name}
+          </p>
+        )}
 
         <button
           onClick={
             handleSummarize
           }
         >
-
           {loading
             ? "Generating..."
             : "Generate Summary"}
-
         </button>
 
         {summary && (
-
           <div className="result-box">
-
             <h3>
               Summary
             </h3>
@@ -448,17 +355,16 @@ function MainApp() {
             </h3>
 
             <ul>
-
               {keywords.map(
-                (word, i) => (
-
+                (
+                  word,
+                  i
+                ) => (
                   <li key={i}>
                     {word}
                   </li>
-
                 )
               )}
-
             </ul>
 
             <button
@@ -466,28 +372,19 @@ function MainApp() {
                 downloadPDF
               }
             >
-
               Download PDF
-
             </button>
-
           </div>
         )}
-
       </div>
-
     </div>
   );
 }
 
 function App() {
-
   return (
-
     <Router>
-
       <Routes>
-
         <Route
           path="/"
           element={<MainApp />}
@@ -499,9 +396,7 @@ function App() {
             <AdminDashboard />
           }
         />
-
       </Routes>
-
     </Router>
   );
 }
