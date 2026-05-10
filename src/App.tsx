@@ -4,7 +4,7 @@ import jsPDF from "jspdf";
 import {
   BrowserRouter as Router,
   Routes,
- Route,
+  Route,
   Link
 } from "react-router-dom";
 
@@ -14,6 +14,7 @@ const BASE_URL =
   "https://ai-summarizer-backend-1bo1.onrender.com";
 
 function MainApp() {
+
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token")
   );
@@ -30,20 +31,30 @@ function MainApp() {
 
   const [text, setText] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
+
   const [summary, setSummary] = useState<string>("");
   const [keywords, setKeywords] = useState<string[]>([]);
+
   const [loading, setLoading] = useState<boolean>(false);
 
+  // FILE
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    if (e.target.files && e.target.files.length > 0) {
+
+    if (
+      e.target.files &&
+      e.target.files.length > 0
+    ) {
       setFile(e.target.files[0]);
     }
   };
 
+  // LOGIN
   const handleLogin = async () => {
+
     try {
+
       const res = await axios.post(
         `${BASE_URL}/login`,
         {
@@ -65,13 +76,23 @@ function MainApp() {
       setToken(res.data.access_token);
 
       window.location.reload();
-    } catch {
-      alert("Login failed");
+
+    } catch (error: any) {
+
+      console.log(error);
+
+      alert(
+        error?.response?.data?.detail ||
+        "Login failed"
+      );
     }
   };
 
+  // SIGNUP
   const handleSignup = async () => {
+
     try {
+
       await axios.post(
         `${BASE_URL}/signup`,
         {
@@ -81,14 +102,26 @@ function MainApp() {
         }
       );
 
-      alert("Signup successful, now login");
+      alert(
+        "Signup successful, now login"
+      );
+
       setIsSignup(false);
-    } catch {
-      alert("Signup failed");
+
+    } catch (error: any) {
+
+      console.log(error);
+
+      alert(
+        error?.response?.data?.detail ||
+        "Signup failed"
+      );
     }
   };
 
+  // LOGOUT
   const handleLogout = () => {
+
     localStorage.removeItem("token");
     localStorage.removeItem("email");
 
@@ -97,15 +130,22 @@ function MainApp() {
     window.location.reload();
   };
 
+  // SUMMARIZE
   const handleSummarize = async () => {
+
     if (!text && !file) {
-      alert("Please enter text or upload a PDF");
+
+      alert(
+        "Please enter text or upload a PDF"
+      );
+
       return;
     }
 
     setLoading(true);
 
     try {
+
       const formData = new FormData();
 
       if (text) {
@@ -121,11 +161,14 @@ function MainApp() {
         formData,
         {
           headers: {
-            "Content-Type":
-              "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         }
+      );
+
+      console.log(
+        "SUCCESS:",
+        response.data
       );
 
       setSummary(
@@ -135,17 +178,44 @@ function MainApp() {
       setKeywords(
         response.data.keywords || []
       );
-    } catch {
-      alert("Error while summarizing");
+
+    } catch (error: any) {
+
+      console.log(
+        "FULL ERROR:",
+        error
+      );
+
+      if (error.response) {
+
+        console.log(
+          "ERROR DATA:",
+          error.response.data
+        );
+
+        alert(
+          JSON.stringify(
+            error.response.data
+          )
+        );
+
+      } else {
+
+        alert(error.message);
+      }
+
     }
 
     setLoading(false);
   };
 
+  // DOWNLOAD PDF
   const downloadPDF = () => {
+
     const doc = new jsPDF();
 
     doc.setFontSize(16);
+
     doc.text(
       "AI Text Summarizer Result",
       20,
@@ -153,7 +223,12 @@ function MainApp() {
     );
 
     doc.setFontSize(12);
-    doc.text("Summary:", 20, 40);
+
+    doc.text(
+      "Summary:",
+      20,
+      40
+    );
 
     const splitSummary =
       doc.splitTextToSize(
@@ -182,10 +257,13 @@ function MainApp() {
     doc.save("summary.pdf");
   };
 
-  // LOGIN / SIGNUP SCREEN
+  // LOGIN / SIGNUP PAGE
   if (!token) {
+
     return (
+
       <div className="app auth-page">
+
         <h1>
           {isSignup
             ? "Create Account"
@@ -199,7 +277,9 @@ function MainApp() {
         </p>
 
         <div className="card">
+
           {isSignup && (
+
             <input
               placeholder="Username"
               value={username}
@@ -209,6 +289,7 @@ function MainApp() {
                 )
               }
             />
+
           )}
 
           <input
@@ -239,9 +320,11 @@ function MainApp() {
                 : handleLogin
             }
           >
+
             {isSignup
               ? "Signup"
               : "Login"}
+
           </button>
 
           <p
@@ -252,18 +335,24 @@ function MainApp() {
               )
             }
           >
+
             {isSignup
               ? "Already have an account? Login"
               : "New user? Create account"}
+
           </p>
+
         </div>
+
       </div>
     );
   }
 
   // MAIN APP
   return (
+
     <div className="app">
+
       <h1>
         ✨ AI Text Summarizer
       </h1>
@@ -273,12 +362,16 @@ function MainApp() {
           marginBottom: "20px",
         }}
       >
+
         {savedEmail ===
           "admin@gmail.com" && (
+
           <Link to="/admin">
+
             <button>
               Open Admin Dashboard
             </button>
+
           </Link>
         )}
 
@@ -289,11 +382,15 @@ function MainApp() {
             marginLeft: "10px",
           }}
         >
+
           Logout
+
         </button>
+
       </div>
 
       <div className="card">
+
         <textarea
           placeholder="Paste your text here..."
           value={text}
@@ -305,6 +402,7 @@ function MainApp() {
         />
 
         <div className="upload-box">
+
           <input
             type="file"
             accept=".pdf"
@@ -318,6 +416,7 @@ function MainApp() {
               📄 {file.name}
             </p>
           )}
+
         </div>
 
         <button
@@ -325,13 +424,17 @@ function MainApp() {
             handleSummarize
           }
         >
+
           {loading
             ? "Generating..."
             : "Generate Summary"}
+
         </button>
 
         {summary && (
+
           <div className="result-box">
+
             <h3>
               Summary
             </h3>
@@ -345,16 +448,17 @@ function MainApp() {
             </h3>
 
             <ul>
+
               {keywords.map(
-                (
-                  word,
-                  i
-                ) => (
+                (word, i) => (
+
                   <li key={i}>
                     {word}
                   </li>
+
                 )
               )}
+
             </ul>
 
             <button
@@ -362,19 +466,28 @@ function MainApp() {
                 downloadPDF
               }
             >
+
               Download PDF
+
             </button>
+
           </div>
         )}
+
       </div>
+
     </div>
   );
 }
 
 function App() {
+
   return (
+
     <Router>
+
       <Routes>
+
         <Route
           path="/"
           element={<MainApp />}
@@ -386,7 +499,9 @@ function App() {
             <AdminDashboard />
           }
         />
+
       </Routes>
+
     </Router>
   );
 }
