@@ -4,11 +4,14 @@ import jsPDF from "jspdf";
 import {
   BrowserRouter as Router,
   Routes,
-  Route,
+ Route,
   Link
 } from "react-router-dom";
 
 import AdminDashboard from "./Pages/AdminDashboard";
+
+const BASE_URL =
+  "https://ai-summarizer-backend-1bo1.onrender.com";
 
 function MainApp() {
   const [token, setToken] = useState<string | null>(
@@ -42,8 +45,7 @@ function MainApp() {
   const handleLogin = async () => {
     try {
       const res = await axios.post(
-        "https://ai-summarizer-backend-1bo1.onrender.com/"
-        "http://127.0.0.1:8000/login",
+        `${BASE_URL}/login`,
         {
           email,
           password,
@@ -71,7 +73,7 @@ function MainApp() {
   const handleSignup = async () => {
     try {
       await axios.post(
-        "http://127.0.0.1:8000/signup",
+        `${BASE_URL}/signup`,
         {
           username,
           email,
@@ -115,7 +117,7 @@ function MainApp() {
       }
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/summarize",
+        `${BASE_URL}/summarize`,
         formData,
         {
           headers: {
